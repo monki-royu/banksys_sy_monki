@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import streamlit as st
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 
 from app.data_loader import CATEGORICAL_COLUMNS, NUMERICAL_COLUMNS, TARGET_COLUMN
 
