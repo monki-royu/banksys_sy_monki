@@ -57,48 +57,28 @@ jobs:
               --build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
               -t ${{ env.APP_NAME }}:latest .
 
-            echo ">> Cleaning up old containers"
-            docker rm -f ${{ env.APP_NAME }} 2>/dev/null || true
-
-            echo ">> Finding available host port"
-            PORT=""
-            for p in $(seq ${{ env.PORT_START }} ${{ env.PORT_END }}); do
-              echo "  >> Checking port $p..."
-              if python3 -c "
-import socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-try:
-    s.bind(('0.0.0.0', $p))
-    s.close()
-    exit(0)
-except OSError:
-    exit(1)
-" 2>/dev/null; then
-                PORT="$p"
-                echo "  >> Port $p is available"
-                break
-              fi
+            echo ">> Killing all containers using ports 8888-8898"
+            for port in $(seq ${{ env.PORT_START }} ${{ env.PORT_END }}); do
+              # Find containers bound to this port and kill them
+              docker ps -q --filter "publish=$port" 2>/dev/null | while read cid; do
+                echo "  >> Killing container $cid on port $port"
+                docker rm -f "$cid" 2>/dev/null || true
+              done
             done
 
-            if [ -z "${PORT}" ]; then
-              echo ">> Port range ${{ env.PORT_START }}-${{ env.PORT_END }} all occupied, aborting"
-              exit 1
-            fi
-            echo ">> Deploying to host port ${PORT}"
-
-            echo ">> Starting production container"
+            echo ">> Starting production container on port ${{ env.CONTAINER_PORT }}"
             docker run -d \
               --name ${{ env.APP_NAME }} \
               --restart unless-stopped \
-              -p ${PORT}:${{ env.CONTAINER_PORT }} \
+              -p ${{ env.CONTAINER_PORT }}:${{ env.CONTAINER_PORT }} \
               ${{ env.APP_NAME }}:latest
 
             echo ">> Waiting for container to be ready"
             sleep 5
 
             echo ">> Health check"
-            python3 -c "import urllib.request; print(urllib.request.urlopen('http://localhost:${PORT}/health').read().decode())"
+            python3 -c "import urllib.request; print(urllib.request.urlopen('http://localhost:${{ env.CONTAINER_PORT }}/health').read().decode())"
 
             echo ""
             echo ">> Deployment successful"
-            echo ">> App available at: http://${{ secrets.SSH_HOST }}:${PORT}"
+            echo ">> App available at: http://${{ secrets.SSH_HOST }}:${{ env.CONTAINER_PORT }}"
