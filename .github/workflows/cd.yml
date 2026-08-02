@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via SSH
+      - name: Deploy to server via rsync + SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -27,16 +27,30 @@ jobs:
           script: |
             set -e
 
-            echo ">> Preparing deploy directory"
+            echo ">> Creating deploy directory"
             mkdir -p ${{ env.DEPLOY_DIR }}
 
-            echo ">> Syncing code"
+      - name: Rsync code to server
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avz --delete --exclude='.git' --exclude='data/' --exclude='model/saved_models/' --exclude='.github/'
+          path: ./
+          remote_path: ${{ env.DEPLOY_DIR }}
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Build & run container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            set -e
+
             cd ${{ env.DEPLOY_DIR }}
-            if [ -d .git ]; then
-              git pull
-            else
-              git clone https://github.com/monki-royu/${{ env.APP_NAME }}.git .
-            fi
 
             echo ">> Building Docker image"
             docker build \
@@ -44,19 +58,20 @@ jobs:
               -t ${{ env.APP_NAME }}:latest .
 
             echo ">> Finding available host port"
-            port_in_use() {
-              ss -ltnH 2>/dev/null | grep -q ":$1 " && return 0
-              docker ps --format "{{.Ports}}" 2>/dev/null | grep -q ":$1->" && return 0
-              return 1
-            }
-            PORT=""
             for p in $(seq ${{ env.PORT_START }} ${{ env.PORT_END }}); do
-              if ! port_in_use "$p"; then PORT="$p"; break; fi
+              if ss -ltnH 2>/dev/null | grep -q ":$p " || docker ps --format "{{.Ports}}" 2>/dev/null | grep -q ":$p->"; then
+                continue
+              fi
+              PORT="$p"
+              break
             done
-            [ -z "$PORT" ] && { echo ">> Port range ${{ env.PORT_START }}-${{ env.PORT_END }} all occupied, aborting"; exit 1; }
-            echo ">> Deploying to host port $PORT"
+            if [ -z "${PORT}" ]; then
+              echo ">> Port range ${{ env.PORT_START }}-${{ env.PORT_END }} all occupied, aborting"
+              exit 1
+            fi
+            echo ">> Deploying to host port ${PORT}"
 
-            echo ">> Removing old container (if any)"
+            echo ">> Removing old container"
             docker rm -f ${{ env.APP_NAME }} 2>/dev/null || true
 
             echo ">> Starting new container"
