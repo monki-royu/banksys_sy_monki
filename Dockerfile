@@ -9,11 +9,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 ARG PIP_INDEX_URL=https://pypi.org/simple
 
 COPY requirements.txt .
@@ -21,11 +16,10 @@ RUN pip install --no-cache-dir --timeout 120 -i "${PIP_INDEX_URL}" -r requiremen
 
 COPY app/ app/
 COPY model/ model/
-# data/ excluded via .dockerignore — app uses synthetic fallback
 
-# Health check
+# Health check using Python stdlib (no curl needed)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -fsS http://localhost:8888/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8888/health')" || exit 1
 
 EXPOSE 8888
 

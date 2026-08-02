@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to server via rsync + SSH
+      - name: Prepare deploy directory
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -26,7 +26,6 @@ jobs:
           script_stop: true
           script: |
             set -e
-
             echo ">> Creating deploy directory"
             mkdir -p ${{ env.DEPLOY_DIR }}
 
@@ -47,6 +46,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
+          command_timeout: 30m
           script: |
             set -e
 
@@ -85,7 +85,7 @@ jobs:
             sleep 5
 
             echo ">> Health check"
-            curl -fsS http://localhost:${PORT}/health
+            python3 -c "import urllib.request; print(urllib.request.urlopen('http://localhost:${PORT}/health').read().decode())"
 
             echo ""
             echo ">> Deployment successful"
