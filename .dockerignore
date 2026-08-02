@@ -1,0 +1,32 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ruff_cache/
+
+# Data & Models (not in Docker image)
+data/
+model/saved_models/
+
+# IDE
+.idea/
+.vscode/
+
+# Testing
+.htmlcov/
+.coverage
+coverage.xml
+
+# Docker (ignore itself)
+.dockerignore
+Dockerfile
+
+# Standards (not needed at runtime)
+standards/
+PROGRESS.md
+README.md
+LICENSE
