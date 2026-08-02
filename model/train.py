@@ -38,7 +38,11 @@ SAVED_MODELS_DIR = PROJECT_ROOT / "model" / "saved_models"
 
 def build_preprocessing_pipeline() -> ColumnTransformer:
     """构建预处理 Pipeline：分类字段 OHE + 数值字段标准化。"""
-    cat_pipeline = OneHotEncoder(handle_unknown="ignore", sparse=False)
+    # 兼容新旧 sklearn API（sparse_output vs sparse）
+    try:
+        cat_pipeline = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+    except TypeError:
+        cat_pipeline = OneHotEncoder(handle_unknown="ignore", sparse=False)
     num_pipeline = StandardScaler()
 
     preprocessor = ColumnTransformer(
