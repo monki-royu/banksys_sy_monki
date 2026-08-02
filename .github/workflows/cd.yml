@@ -59,25 +59,26 @@ jobs:
 
             echo ">> Removing old container"
             docker rm -f ${{ env.APP_NAME }} 2>/dev/null || true
+            docker rm -f ${{ env.APP_NAME }}_tmp 2>/dev/null || true
 
-            echo ">> Finding available host port by trying to start container"
+            echo ">> Finding available port by trial-run"
             PORT=""
             for p in $(seq ${{ env.PORT_START }} ${{ env.PORT_END }}); do
               echo ">> Trying port $p..."
-              if docker run -d --name ${{ env.APP_NAME }}_tmp \
+              docker run -d --name ${{ env.APP_NAME }}_tmp \
                 --restart no \
                 -p ${p}:${{ env.CONTAINER_PORT }} \
                 ${{ env.APP_NAME }}:latest \
-                python -c "import time; time.sleep(2)"; then
+                python -c "import time; time.sleep(2)" 2>/dev/null && {
                 docker rm -f ${{ env.APP_NAME }}_tmp > /dev/null 2>&1 || true
                 PORT="$p"
                 echo ">> Port $p is available"
                 break
-              else
-                echo ">> Port $p is in use, trying next"
+              } || {
                 docker rm -f ${{ env.APP_NAME }}_tmp > /dev/null 2>&1 || true
+                echo ">> Port $p is in use, trying next"
                 continue
-              fi
+              }
             done
 
             if [ -z "${PORT}" ]; then
