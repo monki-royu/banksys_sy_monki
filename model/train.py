@@ -160,26 +160,28 @@ def train(
     print("\nTop 10 features:")
     print(importance_df.head(10).to_string(index=False))
 
-    # 绘制 ROC 曲线并保存（兼容新旧 sklearn）
-    import matplotlib
+    # 绘制 ROC 曲线并保存（matplotlib 可选）
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from sklearn.metrics import roc_curve
 
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from sklearn.metrics import roc_curve
-
-    fpr, tpr, _ = roc_curve(y_test, y_proba)
-    plt.figure(figsize=(6, 5))
-    plt.plot(fpr, tpr, label=f"AUC = {auc:.4f}", linewidth=2)
-    plt.plot([0, 1], [0, 1], "k--", alpha=0.5)
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("ROC Curve")
-    plt.legend(loc="lower right")
-    plt.grid(alpha=0.3)
-    roc_path = SAVED_MODELS_DIR / "roc_curve.png"
-    plt.savefig(roc_path, dpi=100, bbox_inches="tight")
-    plt.close()
-    print(f">> ROC curve saved to {roc_path}")
+        fpr, tpr, _ = roc_curve(y_test, y_proba)
+        plt.figure(figsize=(6, 5))
+        plt.plot(fpr, tpr, label=f"AUC = {auc:.4f}", linewidth=2)
+        plt.plot([0, 1], [0, 1], "k--", alpha=0.5)
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("ROC Curve")
+        plt.legend(loc="lower right")
+        plt.grid(alpha=0.3)
+        roc_path = SAVED_MODELS_DIR / "roc_curve.png"
+        plt.savefig(roc_path, dpi=100, bbox_inches="tight")
+        plt.close()
+        print(f">> ROC curve saved to {roc_path}")
+    except ImportError:
+        print(">> matplotlib not installed, skipping ROC curve plot")
 
     return {
         "accuracy": acc,
