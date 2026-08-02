@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.whl
+.venv/
+venv/
+env/
+
+# 数据文件（不进 Git，保留 .gitkeep 占位）
+data/*
+!data/.gitkeep
+
+# 模型产物（不进 Git）
+model/saved_models/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Testing
+.htmlcov/
+.coverage
+coverage.xml
+
+# logs
+logs/
+*.log
+
+# ruff
+.ruff_cache/
