@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --timeout 120 -i "${PIP_INDEX_URL}" -r requiremen
 
 COPY app/ app/
 COPY model/ model/
-COPY data/ data/
+# data/ excluded via .dockerignore — app uses synthetic fallback
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
