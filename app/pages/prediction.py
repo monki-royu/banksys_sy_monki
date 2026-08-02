@@ -13,10 +13,10 @@ import streamlit as st
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.data_loader import (  # noqa: E402
+from app.data_loader import (
     NUMERICAL_COLUMNS,
 )
-from model.predict import load_model, predict_single  # noqa: E402
+from model.predict import load_model, predict_single
 
 # ── 字段显示名映射 ─────────────────────────────────────────────────
 FIELD_LABELS: dict[str, str] = {

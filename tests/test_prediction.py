@@ -12,8 +12,8 @@ from sklearn.pipeline import Pipeline
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from model.predict import load_model, predict_single  # noqa: E402
-from model.train import build_preprocessing_pipeline, train  # noqa: E402
+from model.predict import load_model, predict_single
+from model.train import build_preprocessing_pipeline, train
 
 
 class TestTraining:

@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore")
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.data_loader import (  # noqa: E402
+from app.data_loader import (
     CATEGORICAL_COLUMNS,
     FEATURE_COLUMNS,
     NUMERICAL_COLUMNS,

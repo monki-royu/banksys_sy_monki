@@ -11,7 +11,7 @@ import pytest
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.data_loader import _generate_synthetic_data  # noqa: E402
+from app.data_loader import _generate_synthetic_data
 
 
 @pytest.fixture
