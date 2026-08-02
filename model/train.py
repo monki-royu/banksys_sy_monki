@@ -163,6 +163,7 @@ def train(
     # 绘制 ROC 曲线并保存（matplotlib 可选）
     try:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         from sklearn.metrics import roc_curve
