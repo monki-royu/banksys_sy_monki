@@ -188,8 +188,8 @@ def train(
 
 if __name__ == "__main__":
     result = train()
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print("Training completed successfully!")
     print(f"  AUC: {result['auc']:.4f}")
     print(f"  F1:  {result['f1']:.4f}")
-    print(f"{'='*40}")
+    print(f"{'=' * 40}")

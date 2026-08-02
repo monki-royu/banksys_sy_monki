@@ -253,9 +253,9 @@ def _do_prediction(pipeline, features_meta: dict, input_data: dict[str, Any]) ->
         ">
             <h2 style="color: {color}; margin: 0;">{label}</h2>
             <p style="font-size: 1.5rem; margin: 0.5rem 0;">
-                认购概率: <strong>{result['probabilities']['yes']:.1%}</strong>
+                认购概率: <strong>{result["probabilities"]["yes"]:.1%}</strong>
             </p>
-            <p style="margin: 0;">置信度: {result['confidence']}</p>
+            <p style="margin: 0;">置信度: {result["confidence"]}</p>
         </div>
         """,
         unsafe_allow_html=True,

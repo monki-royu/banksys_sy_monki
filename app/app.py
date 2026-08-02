@@ -40,8 +40,7 @@ page = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 st.sidebar.markdown(
-    "**数据说明**:基于 UCI Bank Marketing 风格数据，"
-    "分析客户特征与定期存款认购的关联。"
+    "**数据说明**:基于 UCI Bank Marketing 风格数据，分析客户特征与定期存款认购的关联。"
 )
 
 # ── 页面路由 ────────────────────────────────────────────────────────
