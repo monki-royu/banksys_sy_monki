@@ -57,24 +57,36 @@ jobs:
               --build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
               -t ${{ env.APP_NAME }}:latest .
 
-            echo ">> Finding available host port"
+            echo ">> Removing old container"
+            docker rm -f ${{ env.APP_NAME }} 2>/dev/null || true
+
+            echo ">> Finding available host port by trying to start container"
+            PORT=""
             for p in $(seq ${{ env.PORT_START }} ${{ env.PORT_END }}); do
-              if ss -ltnH 2>/dev/null | grep -q ":$p " || docker ps --format "{{.Ports}}" 2>/dev/null | grep -q ":$p->"; then
+              echo ">> Trying port $p..."
+              if docker run -d --name ${{ env.APP_NAME }}_tmp \
+                --restart no \
+                -p ${p}:${{ env.CONTAINER_PORT }} \
+                ${{ env.APP_NAME }}:latest \
+                python -c "import time; time.sleep(2)"; then
+                docker rm -f ${{ env.APP_NAME }}_tmp > /dev/null 2>&1 || true
+                PORT="$p"
+                echo ">> Port $p is available"
+                break
+              else
+                echo ">> Port $p is in use, trying next"
+                docker rm -f ${{ env.APP_NAME }}_tmp > /dev/null 2>&1 || true
                 continue
               fi
-              PORT="$p"
-              break
             done
+
             if [ -z "${PORT}" ]; then
               echo ">> Port range ${{ env.PORT_START }}-${{ env.PORT_END }} all occupied, aborting"
               exit 1
             fi
             echo ">> Deploying to host port ${PORT}"
 
-            echo ">> Removing old container"
-            docker rm -f ${{ env.APP_NAME }} 2>/dev/null || true
-
-            echo ">> Starting new container"
+            echo ">> Starting production container"
             docker run -d \
               --name ${{ env.APP_NAME }} \
               --restart unless-stopped \
